@@ -61,31 +61,3 @@ class Factory:
         return inst
 
 
-if __name__ == '__main__':
-    from pprint import pprint
-
-
-    class Test:
-        field1: int
-        field2: ObjectId
-        field3: list[ObjectId]
-        field4: list[list[ObjectId]]
-        field5: dict[str: list[ObjectId]]
-
-
-    f = Factory(Test)
-    res = f.create_inst(_id=1,
-                        field1=4,
-                        field2=ObjectId("648b78d24c4b38560a352ce1"),
-                        field3=[ObjectId("648b78d24c4b38560a352ce1"),
-                                ObjectId("648b78d24c4b38560a352ce2")],
-                        field4=[[ObjectId("648b78d24c4b38560a352ce1"), ObjectId("648b78d24c4b38560a352ce2")],
-                                [ObjectId("648b78d24c4b38560a352ce3"), ObjectId("648b78d24c4b38560a352ce4")],
-                                [ObjectId("648b78d24c4b38560a352ce5"), ObjectId("648b78d24c4b38560a352ce6")]],
-                        field5={
-                            '1': [ObjectId('648b78d24c4b38560a352ce1'), ObjectId("648b78d24c4b38560a352ce1")],
-                            '2': [ObjectId('648b78d24c4b38560a352ce2'), ObjectId("648b78d24c4b38560a352ce2")],
-                            '3': [ObjectId('648b78d24c4b38560a352ce3'), ObjectId("648b78d24c4b38560a352ce3")]
-                        }).jsonify()
-
-    pprint(res)
