@@ -176,9 +176,9 @@ class DataBase():
 
     def __init__(self, name):
         '''
-        # Description: Initializes a database instance.
-        # Parameters:
-        #   - name: The name of the database.
+        Description: Initializes a database instance.
+        Parameters:
+          - name: The name of the database.
         '''
         self.client = pymongo.MongoClient(CONNECTION_STRING)
         self.db = self.client.get_database(name)
