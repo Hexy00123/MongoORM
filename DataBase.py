@@ -1,5 +1,5 @@
 import pymongo
-from bson import ObjectId
+from bson import ObjectId, errors
 from typing import get_args, get_origin
 from config import CONNECTION_STRING
 from ORM.Factory import Factory
@@ -102,6 +102,9 @@ class DBCollection():
 
         return res.where(**kwargs)
 
+    def __iter__(self):
+        return iter(self.find())
+
     def get(self, **kwargs):
         '''
         Description: Retrieves a single object from the collection based on the provided criteria.
@@ -130,13 +133,19 @@ class DBCollection():
             return self.factory.create_inst(**res)
         return None
 
+    def __getitem__(self, item: ObjectId):
+        if type(item) != ObjectId:
+            raise TypeError("Wrong type for object id")
+
+        return self.get_by_id(item)
+
     def remove_by_id(self, id):
         '''
         Description: Removes an object from the collection based on its ID.
         Parameters:
           - id: The ID of the object to be removed.
         '''
-        self.db_collection.remove({"_id": {"$eq": id}})
+        self.db_collection.delete_many({"_id": {"$eq": id}})
 
     def update_instance(self, id, key, value):
         '''
@@ -162,10 +171,7 @@ class DataBase():
         Raises:
           - TypeError: If the data type is not supported.
         '''
-        if dtype in DataBase.BASE_TYPES:
-            return
-
-        if dtype in DataBase.COMPOSE_TYPES:
+        if dtype in [DataBase.BASE_TYPES, DataBase.BASE_TYPES]:
             return
 
         if get_origin(dtype) in DataBase.COMPOSE_TYPES:
@@ -174,13 +180,13 @@ class DataBase():
         else:
             raise TypeError(f"Unknown type(s) for db: {dtype}")
 
-    def __init__(self, name):
+    def __init__(self, name, connection_string):
         '''
-        Description: Initializes a database instance.
-        Parameters:
-          - name: The name of the database.
+        # Description: Initializes a database instance.
+        # Parameters:
+        #   - name: The name of the database.
         '''
-        self.client = pymongo.MongoClient(CONNECTION_STRING)
+        self.client = pymongo.MongoClient(connection_string)
         self.db = self.client.get_database(name)
         self.dtypes = []
         self.collections = dict()
@@ -196,6 +202,8 @@ class DataBase():
         if type(dtype) is not type:
             raise TypeError("Collection can accept only type")
         self.dtypes.append(dtype)
+
+        return dtype
 
     def build(self):
         # Description: Builds the collections in the database.
