@@ -28,9 +28,6 @@ class Factory:
             def __str__(obj):
                 return f"{str(self.dtype.__name__)}: {'{'}{', '.join([f'{field}={getattr(obj, field)}' for field in self.dtype.__annotations__])}{'}'}"
 
-            def __repr__(obj):
-                return obj.__str__()
-
             def jsonify(obj):
                 def convert_to_json(value):
                     if isinstance(value, ObjectId):
@@ -59,5 +56,3 @@ class Factory:
             for field in kwargs:
                 setattr(inst, field, kwargs[field])
         return inst
-
-
