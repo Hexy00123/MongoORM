@@ -2,7 +2,8 @@ from bson import ObjectId
 
 
 class Factory:
-    def __init__(self, dtype: type):
+    def __init__(self, dtype: type, collection):
+        self.collection = collection
         self.dtype = dtype
 
     def create_inst(self, **kwargs):
@@ -49,10 +50,31 @@ class Factory:
 
                 return result
 
+            def __setattr__(obj, key, value):
+                if '_id' in obj.__dict__:
+                    if obj._id not in self.collection._object_updates:
+                        self.collection._object_updates[obj._id] = {key: value}
+                        self.__dict__[key] = value
+                    else:
+                        self.collection._object_updates[obj._id][key] = value
+                        self.__dict__[key] = value
+                else:
+                    obj.__dict__[key] = value
+
+            def commit(obj):
+                updates = self.collection._object_updates[obj._id]
+                for key in updates:
+                    self.collection.update_instance(obj._id, key, updates[key])
+                print(self.collection._object_updates)
+
+            def __clear_updates(obj):
+                self.collection._object_updates[obj._id] = {}
+
         if self.dtype.__init__ != object.__init__:
             inst = Data(**kwargs)
         else:
             inst = Data()
             for field in kwargs:
                 setattr(inst, field, kwargs[field])
+                inst._Data__clear_updates()
         return inst
