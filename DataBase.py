@@ -1,5 +1,5 @@
 import pymongo
-from bson import ObjectId
+from bson import ObjectId, errors
 from typing import get_args, get_origin
 from config import CONNECTION_STRING
 from Factory import Factory
@@ -134,9 +134,16 @@ class DBCollection():
             return self.factory.create_inst(**res)
         return None
 
+<<<<<<< HEAD
     def __getitem__(self, item):
         if type(item) != ObjectId:
             raise TypeError('db.Collection[id] method can accept only id of the object')
+=======
+    def __getitem__(self, item: ObjectId):
+        if type(item) != ObjectId:
+            raise TypeError("Wrong type for object id")
+
+>>>>>>> 44441aceec6f604d7c39f5df8f0dcc546a6822a0
         return self.get_by_id(item)
 
     def remove_by_id(self, id):
@@ -171,10 +178,7 @@ class DataBase():
         Raises:
           - TypeError: If the data type is not supported.
         '''
-        if dtype in DataBase.BASE_TYPES:
-            return
-
-        if dtype in DataBase.COMPOSE_TYPES:
+        if dtype in [DataBase.BASE_TYPES, DataBase.BASE_TYPES]:
             return
 
         if get_origin(dtype) in DataBase.COMPOSE_TYPES:
@@ -205,6 +209,8 @@ class DataBase():
         if type(dtype) is not type:
             raise TypeError("Collection can accept only type")
         self.dtypes.append(dtype)
+
+        return dtype
 
     def build(self):
         # Description: Builds the collections in the database.
