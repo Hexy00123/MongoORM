@@ -54,18 +54,14 @@ class Factory:
                 if '_id' in obj.__dict__:
                     if obj._id not in self.collection._object_updates:
                         self.collection._object_updates[obj._id] = {key: value}
-                        self.__dict__[key] = value
                     else:
                         self.collection._object_updates[obj._id][key] = value
-                        self.__dict__[key] = value
-                else:
-                    obj.__dict__[key] = value
+                obj.__dict__[key] = value
 
             def commit(obj):
                 updates = self.collection._object_updates[obj._id]
                 for key in updates:
                     self.collection.update_instance(obj._id, key, updates[key])
-                print(self.collection._object_updates)
 
             def __clear_updates(obj):
                 self.collection._object_updates[obj._id] = {}
@@ -75,6 +71,6 @@ class Factory:
         else:
             inst = Data()
             for field in kwargs:
-                setattr(inst, field, kwargs[field])
+                inst.__dict__[field] = kwargs[field]
                 inst._Data__clear_updates()
         return inst
